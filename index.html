@@ -18,6 +18,8 @@ display:flex;
 justify-content:space-between;
 padding:10px;
 font-size:18px;
+border-bottom:2px solid #00eaff;
+box-shadow:0 0 10px #00eaff;
 }
 
 .hearts{color:red;text-shadow:0 0 10px red;}
@@ -25,8 +27,15 @@ font-size:18px;
 .coins{color:gold;text-shadow:0 0 10px gold;}
 .sound{cursor:pointer;font-size:20px;}
 
-.container{text-align:center;margin-top:10px;}
+.container{
+text-align:center;
+margin-top:10px;
+max-width:420px;
+margin-left:auto;
+margin-right:auto;
+}
 
+/* TITLE */
 .title{
 font-size:26px;
 color:#00eaff;
@@ -34,6 +43,7 @@ text-shadow:0 0 20px #00eaff;
 margin-top:20px;
 }
 
+/* BUTTON */
 .btn{
 margin-top:30px;
 padding:15px;
@@ -46,47 +56,72 @@ background:linear-gradient(45deg,#ff003c,#ff6a00);
 box-shadow:0 0 20px red;
 }
 
-/* GRID NEON */
+/* GRID */
 .grid{
 display:grid;
-gap:10px;
-justify-content:center;
-margin-top:15px;
-padding:10px;
-border-radius:15px;
-box-shadow:0 0 20px #00eaff, inset 0 0 30px #00eaff;
+gap:3px;
+width:min(90vw,360px);
+margin:15px auto;
+background:#00eaff;
+padding:3px;
+border-radius:12px;
+
+/* NEON PULSE */
+animation:neonPulse 2s infinite;
 }
 
-/* CELL NEON */
+/* PULSE */
+@keyframes neonPulse{
+0%{box-shadow:0 0 10px #00eaff;}
+50%{box-shadow:0 0 25px #00eaff;}
+100%{box-shadow:0 0 10px #00eaff;}
+}
+
+/* CELL */
 .cell{
-width:75px;
-height:75px;
-background:rgba(0,0,0,0.4);
+width:100%;
+aspect-ratio:1;
+background:#000;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:32px;
-border-radius:12px;
+font-size:min(7vw,28px);
 cursor:pointer;
-border:2px solid #00eaff;
-box-shadow:0 0 10px #00eaff, inset 0 0 10px #00eaff;
 transition:0.2s;
+
+/* DOUBLE NEON BORDER */
+box-shadow:
+inset 0 0 0 2px #00eaff,
+inset 0 0 8px #00eaff,
+0 0 8px #00eaff;
 }
 
 .cell:hover{
-transform:scale(1.05);
-box-shadow:0 0 20px #00eaff, inset 0 0 15px #00eaff;
+transform:scale(1.04);
+box-shadow:
+inset 0 0 0 2px #00eaff,
+inset 0 0 12px #00eaff,
+0 0 20px #00eaff;
 }
 
 /* SYMBOLS */
 .X{
 color:#ff2b2b;
-text-shadow:0 0 10px red,0 0 30px red;
+text-shadow:0 0 10px red,0 0 10px red;
 }
 
 .O{
 color:#00eaff;
-text-shadow:0 0 10px cyan,0 0 30px cyan;
+text-shadow:0 0 10px cyan,0 0 20px cyan;
+}
+
+/* WIN EFFECT */
+.win{
+background:#001f2f;
+box-shadow:
+inset 0 0 10px #00eaff,
+0 0 20px #00eaff,
+0 0 40px #00eaff !important;
 }
 
 /* LABEL */
@@ -96,13 +131,54 @@ font-size:18px;
 color:#ff2b2b;
 text-shadow:0 0 10px red,0 0 20px red;
 }
+/* BACKGROUND CONTAINER */
+.xo-bg{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+z-index:-1;
+overflow:hidden;
+pointer-events:none;
+}
+
+/* X and O base style */
+.xo{
+position:absolute;
+font-weight:bold;
+opacity:0.15;
+animation:float 12s linear infinite;
+}
+
+/* X style */
+.x{
+color:#00eaff;
+text-shadow:0 0 10px #00eaff, 0 0 25px #00eaff;
+}
+
+/* O style */
+.o{
+color:#ff2b2b;
+text-shadow:0 0 10px red, 0 0 25px red;
+}
+
+/* FLOAT + ROTATE */
+@keyframes float{
+0%{
+transform:translateY(100vh) rotate(0deg);
+}
+100%{
+transform:translateY(-10vh) rotate(360deg);
+}
+}
 </style>
 </head>
 
 <body>
-
+<div class="xo-bg"></div>
 <div id="home" class="container">
-<div class="title">⚡ TIC TAC TOE NEON ⚡</div>
+<div class="title"><h3>⚡TIC TAC TOE⚡</h3><br> NEON PRO</div>
 <button class="btn" onclick="startGame()">Start Game</button>
 </div>
 
@@ -144,7 +220,6 @@ osc.stop(ctx.currentTime+duration);
 function tapSound(){playBeep(600,0.1);}
 function winSound(){playBeep(1000,0.3);}
 function loseSound(){playBeep(200,0.4);}
-function comboSound(){playBeep(1400,0.2);}
 
 /* START */
 function startGame(){
@@ -172,7 +247,7 @@ document.getElementById("game").innerHTML=`
 `;
 }
 
-/* SOUND TOGGLE */
+/* SOUND */
 function toggleSound(){
 soundOn=!soundOn;
 masterGain.gain.value=soundOn?1:0;
@@ -202,24 +277,105 @@ grid.appendChild(c);
 
 /* PLAYER */
 function playerMove(i){
-if(board[i])return;
-board[i]="O";
+if(board[i]) return;
+
+board[i] = "O";
 tapSound();
 update();
 
+/* 🔥 FIRST CHECK RESULT */
+if(checkImmediateResult()) return;
+
 setTimeout(()=>{
-aiMove();
-setTimeout(checkResult,200);
+    aiMove();
+
+    /* 🔥 AI ke baad check */
+    setTimeout(checkResult,200);
 },250);
 }
 
 /* AI */
 function aiMove(){
-let empty=board.map((v,i)=>v==""?i:null).filter(v=>v!==null);
-let move=empty[Math.floor(Math.random()*empty.length)];
-board[move]="X";
+
+let empty = board.map((v,i)=>v==""?i:null).filter(v=>v!==null);
+
+/* 🟢 EASY (Level 1–5) */
+if(level <= 5){
+    let move = empty[Math.floor(Math.random()*empty.length)];
+    board[move] = "X";
+}
+
+/* 🟡 MEDIUM (Level 6–15) */
+else if(level <= 15){
+
+    let move = findBestMove("X"); // win
+
+    if(move === null){
+        move = findBestMove("O"); // block
+    }
+
+    if(move === null){
+        move = empty[Math.floor(Math.random()*empty.length)];
+    }
+
+    board[move] = "X";
+}
+
+/* 🔴 HARD (Level 16+) */
+else{
+
+    let move = findBestMove("X"); // win
+
+    if(move === null){
+        move = findBestMove("O"); // block
+    }
+
+    /* center priority */
+    let center = Math.floor(board.length/2);
+    if(move === null && board[center] === ""){
+        move = center;
+    }
+
+    /* corner strategy */
+    if(move === null){
+        let corners = [0, size-1, board.length-size, board.length-1]
+        .filter(i=>board[i]=="");
+
+        if(corners.length){
+            move = corners[Math.floor(Math.random()*corners.length)];
+        }
+    }
+
+    /* fallback */
+    if(move === null){
+        move = empty[Math.floor(Math.random()*empty.length)];
+    }
+
+    board[move] = "X";
+}
+
 tapSound();
 update();
+}
+
+function findBestMove(player){
+
+let lines = getLines();
+
+for(let l of lines){
+
+    let values = l.map(i=>board[i]);
+
+    let countPlayer = values.filter(v=>v==player).length;
+    let countEmpty = values.filter(v=>v=="").length;
+
+    /* win/block condition */
+    if(countEmpty === 1 && countPlayer === size-1){
+        return l[values.indexOf("")];
+    }
+}
+
+return null;
 }
 
 /* RESULT */
@@ -231,23 +387,31 @@ let vals=l.map(i=>board[i]);
 
 if(vals.every(v=>v=="O")){
 winSound();
+highlightWin(l);
+
 let reward=10+level*2;
 coins+=reward;
 localStorage.setItem("coins",coins);
-if(level%3===0)comboSound();
+
+setTimeout(()=>{
 level++;
 init();
+},800);
 return;
 }
 
 if(vals.every(v=>v=="X")){
 loseSound();
+highlightWin(l);
+
 lives--;
+
 if(lives<=0){
-showGameOver();
+setTimeout(showGameOver,800);
 return;
 }
-init();
+
+setTimeout(init,800);
 return;
 }
 }
@@ -256,6 +420,14 @@ if(board.every(v=>v)){
 level++;
 init();
 }
+}
+
+/* HIGHLIGHT */
+function highlightWin(line){
+let cells=document.querySelectorAll(".cell");
+line.forEach(i=>{
+cells[i].classList.add("win");
+});
 }
 
 /* GAME OVER */
@@ -299,6 +471,71 @@ c.innerText=board[i];
 c.className="cell";
 if(board[i])c.classList.add(board[i]);
 });
+}
+function checkImmediateResult(){
+
+let lines = getLines();
+
+/* 🔥 PLAYER WIN CHECK */
+for(let l of lines){
+let vals = l.map(i=>board[i]);
+
+if(vals.every(v=>v=="O")){
+winSound();
+highlightWin(l);
+
+let reward = 10 + level*2;
+coins += reward;
+localStorage.setItem("coins",coins);
+
+setTimeout(()=>{
+level++;
+init();
+},800);
+
+return true;
+}
+}
+
+/* 🔥 DRAW CHECK (NO EXTRA AI MOVE) */
+if(board.every(v=>v)){
+level++;
+init();
+return true;
+}
+
+return false;
+}
+const bg = document.querySelector(".xo-bg");
+
+/* kitne symbols chahiye */
+for(let i=0;i<25;i++){
+
+let el = document.createElement("div");
+
+/* random X ya O */
+if(Math.random() > 0.5){
+    el.innerText = "X";
+    el.classList.add("xo","x");
+}else{
+    el.innerText = "O";
+    el.classList.add("xo","o");
+}
+
+/* random position */
+el.style.left = Math.random()*100 + "vw";
+
+/* random size */
+let size = Math.random()*30 + 20;
+el.style.fontSize = size + "px";
+
+/* random speed */
+el.style.animationDuration = (Math.random()*10 + 8) + "s";
+
+/* random delay */
+el.style.animationDelay = Math.random()*10 + "s";
+
+bg.appendChild(el);
 }
 </script>
 
