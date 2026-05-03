@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tic Tac Toe Neon Pro</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:radial-gradient(circle,#1a0033,#000);
+color:white;
+}
+
+/* TOP BAR */
+.topbar{
+display:flex;
+justify-content:space-between;
+padding:10px;
+font-size:18px;
+}
+
+.hearts{color:red;text-shadow:0 0 10px red;}
+.level{color:#00eaff;text-shadow:0 0 10px #00eaff;}
+.coins{color:gold;text-shadow:0 0 10px gold;}
+.sound{cursor:pointer;font-size:20px;}
+
+.container{text-align:center;margin-top:10px;}
+
+.title{
+font-size:26px;
+color:#00eaff;
+text-shadow:0 0 20px #00eaff;
+margin-top:20px;
+}
+
+.btn{
+margin-top:30px;
+padding:15px;
+width:80%;
+border-radius:40px;
+border:none;
+font-size:18px;
+color:white;
+background:linear-gradient(45deg,#ff003c,#ff6a00);
+box-shadow:0 0 20px red;
+}
+
+/* GRID NEON */
+.grid{
+display:grid;
+gap:10px;
+justify-content:center;
+margin-top:15px;
+padding:10px;
+border-radius:15px;
+box-shadow:0 0 20px #00eaff, inset 0 0 30px #00eaff;
+}
+
+/* CELL NEON */
+.cell{
+width:75px;
+height:75px;
+background:rgba(0,0,0,0.4);
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:32px;
+border-radius:12px;
+cursor:pointer;
+border:2px solid #00eaff;
+box-shadow:0 0 10px #00eaff, inset 0 0 10px #00eaff;
+transition:0.2s;
+}
+
+.cell:hover{
+transform:scale(1.05);
+box-shadow:0 0 20px #00eaff, inset 0 0 15px #00eaff;
+}
+
+/* SYMBOLS */
+.X{
+color:#ff2b2b;
+text-shadow:0 0 10px red,0 0 30px red;
+}
+
+.O{
+color:#00eaff;
+text-shadow:0 0 10px cyan,0 0 30px cyan;
+}
+
+/* LABEL */
+.vs{
+margin-top:10px;
+font-size:18px;
+color:#ff2b2b;
+text-shadow:0 0 10px red,0 0 20px red;
+}
+</style>
+</head>
+
+<body>
+
+<div id="home" class="container">
+<div class="title">⚡ TIC TAC TOE NEON ⚡</div>
+<button class="btn" onclick="startGame()">Start Game</button>
+</div>
+
+<div id="game" style="display:none"></div>
+
+<script>
+let level=1,lives=3,coins=0;
+let board=[],size=3;
+let soundOn=true;
+
+coins=parseInt(localStorage.getItem("coins"))||0;
+
+/* AUDIO */
+let ctx,masterGain;
+
+function initAudio(){
+if(!ctx){
+ctx=new(window.AudioContext||window.webkitAudioContext)();
+masterGain=ctx.createGain();
+masterGain.gain.value=1;
+masterGain.connect(ctx.destination);
+}
+}
+
+function playBeep(freq,duration){
+if(!soundOn)return;
+initAudio();
+let osc=ctx.createOscillator();
+let gain=ctx.createGain();
+osc.frequency.value=freq;
+osc.connect(gain);
+gain.connect(masterGain);
+osc.start();
+gain.gain.setValueAtTime(0.3,ctx.currentTime);
+gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+duration);
+osc.stop(ctx.currentTime+duration);
+}
+
+function tapSound(){playBeep(600,0.1);}
+function winSound(){playBeep(1000,0.3);}
+function loseSound(){playBeep(200,0.4);}
+function comboSound(){playBeep(1400,0.2);}
+
+/* START */
+function startGame(){
+initAudio();
+document.getElementById("home").style.display="none";
+document.getElementById("game").style.display="block";
+renderUI();
+init();
+}
+
+/* UI */
+function renderUI(){
+document.getElementById("game").innerHTML=`
+<div class="topbar">
+<div id="hearts"></div>
+<div id="level"></div>
+<div id="coins"></div>
+<div class="sound" onclick="toggleSound()" id="soundBtn">🔊</div>
+</div>
+
+<div class="container">
+<div class="vs">⚔️ Player vs AI ⚔️</div>
+<div class="grid" id="grid"></div>
+</div>
+`;
+}
+
+/* SOUND TOGGLE */
+function toggleSound(){
+soundOn=!soundOn;
+masterGain.gain.value=soundOn?1:0;
+document.getElementById("soundBtn").innerText=soundOn?"🔊":"🔇";
+}
+
+/* INIT */
+function init(){
+size=level<=10?3:5;
+board=Array(size*size).fill("");
+
+document.getElementById("level").innerText="Level "+level;
+document.getElementById("hearts").innerText="❤️".repeat(lives);
+document.getElementById("coins").innerText="💰 "+coins;
+
+let grid=document.getElementById("grid");
+grid.innerHTML="";
+grid.style.gridTemplateColumns=`repeat(${size},1fr)`;
+
+board.forEach((_,i)=>{
+let c=document.createElement("div");
+c.className="cell";
+c.onclick=()=>playerMove(i);
+grid.appendChild(c);
+});
+}
+
+/* PLAYER */
+function playerMove(i){
+if(board[i])return;
+board[i]="O";
+tapSound();
+update();
+
+setTimeout(()=>{
+aiMove();
+setTimeout(checkResult,200);
+},250);
+}
+
+/* AI */
+function aiMove(){
+let empty=board.map((v,i)=>v==""?i:null).filter(v=>v!==null);
+let move=empty[Math.floor(Math.random()*empty.length)];
+board[move]="X";
+tapSound();
+update();
+}
+
+/* RESULT */
+function checkResult(){
+let lines=getLines();
+
+for(let l of lines){
+let vals=l.map(i=>board[i]);
+
+if(vals.every(v=>v=="O")){
+winSound();
+let reward=10+level*2;
+coins+=reward;
+localStorage.setItem("coins",coins);
+if(level%3===0)comboSound();
+level++;
+init();
+return;
+}
+
+if(vals.every(v=>v=="X")){
+loseSound();
+lives--;
+if(lives<=0){
+showGameOver();
+return;
+}
+init();
+return;
+}
+}
+
+if(board.every(v=>v)){
+level++;
+init();
+}
+}
+
+/* GAME OVER */
+function showGameOver(){
+document.getElementById("game").innerHTML=`
+<div style="text-align:center;margin-top:60px;">
+<h1 style="color:red;text-shadow:0 0 20px red;">GAME OVER</h1>
+<p>Coins: ${coins}</p>
+<button class="btn" onclick="restartGame()">Restart Game</button>
+</div>
+`;
+}
+
+/* RESTART */
+function restartGame(){
+level=1;
+lives=3;
+renderUI();
+init();
+}
+
+/* LINES */
+function getLines(){
+let lines=[];
+for(let r=0;r<size;r++){
+let row=[],col=[];
+for(let c=0;c<size;c++){
+row.push(r*size+c);
+col.push(c*size+r);
+}
+lines.push(row,col);
+}
+lines.push([...Array(size)].map((_,i)=>i*(size+1)));
+lines.push([...Array(size)].map((_,i)=>(i+1)*(size-1)));
+return lines;
+}
+
+function update(){
+document.querySelectorAll(".cell").forEach((c,i)=>{
+c.innerText=board[i];
+c.className="cell";
+if(board[i])c.classList.add(board[i]);
+});
+}
+</script>
+
+</body>
+</html>
