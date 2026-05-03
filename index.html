@@ -186,6 +186,19 @@ z-index:9999;
 /* notch phones safe */
 padding-bottom: env(safe-area-inset-bottom);
 }
+#native-ad-container{
+width:100%;
+max-width:420px;
+margin:10px auto;
+text-align:center;
+border-radius:10px;
+overflow:hidden;
+}
+
+/* ensure proper spacing above banner */
+#game{
+padding-bottom:140px; /* 🔥 important (banner + native space) */
+}
 
 #game{
 padding-bottom:70px;
@@ -556,6 +569,14 @@ el.style.animationDelay = Math.random()*10 + "s";
 bg.appendChild(el);
 }
 </script>
+</div>
+<!-- NATIVE AD -->
+<div id="native-ad-container">
+  <script async="async" data-cfasync="false"
+    src="https://pl26443814.profitablecpmratenetwork.com/7388498a4ed1a16068c2874ef9779cd0/invoke.js">
+  </script>
+  <div id="container-7388498a4ed1a16068c2874ef9779cd0"></div>
+</div>
 <div id="ad-container">
   <script>
     atOptions = {
