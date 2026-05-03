@@ -3,6 +3,7 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tic Tac Toe Neon Pro</title>
+
 <style>
 body{
 margin:0;
@@ -10,6 +11,7 @@ font-family:Arial;
 background:radial-gradient(circle,#1a0033,#000);
 color:white;
 }
+
 /* TOP BAR */
 .topbar{
 display:flex;
@@ -19,10 +21,12 @@ font-size:18px;
 border-bottom:2px solid #00eaff;
 box-shadow:0 0 10px #00eaff;
 }
+
 .hearts{color:red;text-shadow:0 0 10px red;}
 .level{color:#00eaff;text-shadow:0 0 10px #00eaff;}
 .coins{color:gold;text-shadow:0 0 10px gold;}
 .sound{cursor:pointer;font-size:20px;}
+
 .container{
 text-align:center;
 margin-top:10px;
@@ -30,6 +34,7 @@ max-width:420px;
 margin-left:auto;
 margin-right:auto;
 }
+
 /* TITLE */
 .title{
 font-size:26px;
@@ -37,6 +42,7 @@ color:#00eaff;
 text-shadow:0 0 20px #00eaff;
 margin-top:20px;
 }
+
 /* BUTTON */
 .btn{
 margin-top:30px;
@@ -49,6 +55,7 @@ color:white;
 background:linear-gradient(45deg,#ff003c,#ff6a00);
 box-shadow:0 0 20px red;
 }
+
 /* GRID */
 .grid{
 display:grid;
@@ -58,15 +65,18 @@ margin:15px auto;
 background:#00eaff;
 padding:3px;
 border-radius:12px;
+
 /* NEON PULSE */
 animation:neonPulse 2s infinite;
 }
+
 /* PULSE */
 @keyframes neonPulse{
 0%{box-shadow:0 0 10px #00eaff;}
 50%{box-shadow:0 0 25px #00eaff;}
 100%{box-shadow:0 0 10px #00eaff;}
 }
+
 /* CELL */
 .cell{
 width:100%;
@@ -78,12 +88,14 @@ justify-content:center;
 font-size:min(7vw,28px);
 cursor:pointer;
 transition:0.2s;
+
 /* DOUBLE NEON BORDER */
 box-shadow:
 inset 0 0 0 2px #00eaff,
 inset 0 0 8px #00eaff,
 0 0 8px #00eaff;
 }
+
 .cell:hover{
 transform:scale(1.04);
 box-shadow:
@@ -91,15 +103,18 @@ inset 0 0 0 2px #00eaff,
 inset 0 0 12px #00eaff,
 0 0 20px #00eaff;
 }
+
 /* SYMBOLS */
 .X{
 color:#ff2b2b;
 text-shadow:0 0 10px red,0 0 10px red;
 }
+
 .O{
 color:#00eaff;
 text-shadow:0 0 10px cyan,0 0 20px cyan;
 }
+
 /* WIN EFFECT */
 .win{
 background:#001f2f;
@@ -108,6 +123,7 @@ inset 0 0 10px #00eaff,
 0 0 20px #00eaff,
 0 0 40px #00eaff !important;
 }
+
 /* LABEL */
 .vs{
 margin-top:10px;
@@ -126,6 +142,7 @@ z-index:-1;
 overflow:hidden;
 pointer-events:none;
 }
+
 /* X and O base style */
 .xo{
 position:absolute;
@@ -133,16 +150,19 @@ font-weight:bold;
 opacity:0.15;
 animation:float 12s linear infinite;
 }
+
 /* X style */
 .x{
 color:#00eaff;
 text-shadow:0 0 10px #00eaff, 0 0 25px #00eaff;
 }
+
 /* O style */
 .o{
 color:#ff2b2b;
 text-shadow:0 0 10px red, 0 0 25px red;
 }
+
 /* FLOAT + ROTATE */
 @keyframes float{
 0%{
@@ -154,20 +174,26 @@ transform:translateY(-10vh) rotate(360deg);
 }
 </style>
 </head>
+
 <body>
 <div class="xo-bg"></div>
 <div id="home" class="container">
 <div class="title"><h3>⚡TIC TAC TOE⚡</h3><br> NEON PRO</div>
 <button class="btn" onclick="startGame()">Start Game</button>
 </div>
+
 <div id="game" style="display:none"></div>
+
 <script>
 let level=1,lives=3,coins=0;
 let board=[],size=3;
 let soundOn=true;
+
 coins=parseInt(localStorage.getItem("coins"))||0;
+
 /* AUDIO */
 let ctx,masterGain;
+
 function initAudio(){
 if(!ctx){
 ctx=new(window.AudioContext||window.webkitAudioContext)();
@@ -176,6 +202,7 @@ masterGain.gain.value=1;
 masterGain.connect(ctx.destination);
 }
 }
+
 function playBeep(freq,duration){
 if(!soundOn)return;
 initAudio();
@@ -189,9 +216,11 @@ gain.gain.setValueAtTime(0.3,ctx.currentTime);
 gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+duration);
 osc.stop(ctx.currentTime+duration);
 }
+
 function tapSound(){playBeep(600,0.1);}
 function winSound(){playBeep(1000,0.3);}
 function loseSound(){playBeep(200,0.4);}
+
 /* START */
 function startGame(){
 initAudio();
@@ -200,6 +229,7 @@ document.getElementById("game").style.display="block";
 renderUI();
 init();
 }
+
 /* UI */
 function renderUI(){
 document.getElementById("game").innerHTML=`
@@ -209,28 +239,34 @@ document.getElementById("game").innerHTML=`
 <div id="coins"></div>
 <div class="sound" onclick="toggleSound()" id="soundBtn">🔊</div>
 </div>
-<div class="container">
-<div class="vs">⚔️ Player vs AI ⚔️</div>
+
+<div class="container"><div><br></div>
+<div class="vs">⚔️ Player vs AI ⚔️</div><br>
 <div class="grid" id="grid"></div>
 </div>
 `;
 }
+
 /* SOUND */
 function toggleSound(){
 soundOn=!soundOn;
 masterGain.gain.value=soundOn?1:0;
 document.getElementById("soundBtn").innerText=soundOn?"🔊":"🔇";
 }
+
 /* INIT */
 function init(){
 size=level<=10?3:5;
 board=Array(size*size).fill("");
+
 document.getElementById("level").innerText="Level "+level;
 document.getElementById("hearts").innerText="❤️".repeat(lives);
 document.getElementById("coins").innerText="💰 "+coins;
+
 let grid=document.getElementById("grid");
 grid.innerHTML="";
 grid.style.gridTemplateColumns=`repeat(${size},1fr)`;
+
 board.forEach((_,i)=>{
 let c=document.createElement("div");
 c.className="cell";
@@ -238,114 +274,154 @@ c.onclick=()=>playerMove(i);
 grid.appendChild(c);
 });
 }
+
 /* PLAYER */
 function playerMove(i){
 if(board[i]) return;
+
 board[i] = "O";
 tapSound();
 update();
+
 /* 🔥 FIRST CHECK RESULT */
 if(checkImmediateResult()) return;
+
 setTimeout(()=>{
     aiMove();
+
     /* 🔥 AI ke baad check */
     setTimeout(checkResult,200);
 },250);
 }
+
 /* AI */
 function aiMove(){
+
 let empty = board.map((v,i)=>v==""?i:null).filter(v=>v!==null);
+
 /* 🟢 EASY (Level 1–5) */
 if(level <= 5){
     let move = empty[Math.floor(Math.random()*empty.length)];
     board[move] = "X";
 }
+
 /* 🟡 MEDIUM (Level 6–15) */
 else if(level <= 15){
+
     let move = findBestMove("X"); // win
+
     if(move === null){
         move = findBestMove("O"); // block
     }
+
     if(move === null){
         move = empty[Math.floor(Math.random()*empty.length)];
     }
+
     board[move] = "X";
 }
+
 /* 🔴 HARD (Level 16+) */
 else{
+
     let move = findBestMove("X"); // win
+
     if(move === null){
         move = findBestMove("O"); // block
     }
+
     /* center priority */
     let center = Math.floor(board.length/2);
     if(move === null && board[center] === ""){
         move = center;
     }
+
     /* corner strategy */
     if(move === null){
         let corners = [0, size-1, board.length-size, board.length-1]
         .filter(i=>board[i]=="");
+
         if(corners.length){
             move = corners[Math.floor(Math.random()*corners.length)];
         }
     }
+
     /* fallback */
     if(move === null){
         move = empty[Math.floor(Math.random()*empty.length)];
     }
+
     board[move] = "X";
 }
+
 tapSound();
 update();
 }
+
 function findBestMove(player){
+
 let lines = getLines();
+
 for(let l of lines){
+
     let values = l.map(i=>board[i]);
+
     let countPlayer = values.filter(v=>v==player).length;
     let countEmpty = values.filter(v=>v=="").length;
+
     /* win/block condition */
     if(countEmpty === 1 && countPlayer === size-1){
         return l[values.indexOf("")];
     }
 }
+
 return null;
 }
+
 /* RESULT */
 function checkResult(){
 let lines=getLines();
+
 for(let l of lines){
 let vals=l.map(i=>board[i]);
+
 if(vals.every(v=>v=="O")){
 winSound();
 highlightWin(l);
+
 let reward=10+level*2;
 coins+=reward;
 localStorage.setItem("coins",coins);
+
 setTimeout(()=>{
 level++;
 init();
 },800);
 return;
 }
+
 if(vals.every(v=>v=="X")){
 loseSound();
 highlightWin(l);
+
 lives--;
+
 if(lives<=0){
 setTimeout(showGameOver,800);
 return;
 }
+
 setTimeout(init,800);
 return;
 }
 }
+
 if(board.every(v=>v)){
 level++;
 init();
 }
 }
+
 /* HIGHLIGHT */
 function highlightWin(line){
 let cells=document.querySelectorAll(".cell");
@@ -353,6 +429,7 @@ line.forEach(i=>{
 cells[i].classList.add("win");
 });
 }
+
 /* GAME OVER */
 function showGameOver(){
 document.getElementById("game").innerHTML=`
@@ -363,6 +440,7 @@ document.getElementById("game").innerHTML=`
 </div>
 `;
 }
+
 /* RESTART */
 function restartGame(){
 level=1;
@@ -370,6 +448,7 @@ lives=3;
 renderUI();
 init();
 }
+
 /* LINES */
 function getLines(){
 let lines=[];
@@ -385,6 +464,7 @@ lines.push([...Array(size)].map((_,i)=>i*(size+1)));
 lines.push([...Array(size)].map((_,i)=>(i+1)*(size-1)));
 return lines;
 }
+
 function update(){
 document.querySelectorAll(".cell").forEach((c,i)=>{
 c.innerText=board[i];
@@ -393,35 +473,46 @@ if(board[i])c.classList.add(board[i]);
 });
 }
 function checkImmediateResult(){
+
 let lines = getLines();
+
 /* 🔥 PLAYER WIN CHECK */
 for(let l of lines){
 let vals = l.map(i=>board[i]);
+
 if(vals.every(v=>v=="O")){
 winSound();
 highlightWin(l);
+
 let reward = 10 + level*2;
 coins += reward;
 localStorage.setItem("coins",coins);
+
 setTimeout(()=>{
 level++;
 init();
 },800);
+
 return true;
 }
 }
+
 /* 🔥 DRAW CHECK (NO EXTRA AI MOVE) */
 if(board.every(v=>v)){
 level++;
 init();
 return true;
 }
+
 return false;
 }
 const bg = document.querySelector(".xo-bg");
+
 /* kitne symbols chahiye */
 for(let i=0;i<25;i++){
+
 let el = document.createElement("div");
+
 /* random X ya O */
 if(Math.random() > 0.5){
     el.innerText = "X";
@@ -430,17 +521,23 @@ if(Math.random() > 0.5){
     el.innerText = "O";
     el.classList.add("xo","o");
 }
+
 /* random position */
 el.style.left = Math.random()*100 + "vw";
+
 /* random size */
 let size = Math.random()*30 + 20;
 el.style.fontSize = size + "px";
+
 /* random speed */
 el.style.animationDuration = (Math.random()*10 + 8) + "s";
+
 /* random delay */
 el.style.animationDelay = Math.random()*10 + "s";
+
 bg.appendChild(el);
 }
 </script>
+
 </body>
 </html>
